@@ -1,3 +1,5 @@
+let button;
+
 let hostDateTracker;
 let currentDropdown;
 async function initializeSchedule() {
@@ -90,24 +92,6 @@ async function initializeSchedule() {
 
     }
 
-
-    //Listen for schedule button clicks
-    // $(".dropdown").click(function (event) {
-    //   event.stopPropagation();
-    //   event.stopImmediatePropagation();
-    //   console.log($(this));
-    //   if (currentDropdown) {
-    //     currentDropdown.css("display", "none");
-    //   }
-    //   currentDropdown = $(this).find(".dropdown-content");
-    //   currentDropdown.css("display", "block");
-    //   //If its an available or res button, add dropdown
-    //   if ($(this).hasClass("available-button")) {
-    //     console.log($(this));
-    //   } else if ($(this).hasClass("res-button")) {
-    //     console.log("wanna edit or delete this res?");
-    //   }
-    // });
   }
 
   for (let table of outsideTables) {
@@ -186,6 +170,10 @@ async function initializeSchedule() {
     event.stopPropagation();
     event.stopImmediatePropagation();
     console.log($(this));
+    
+    if($(this).hasClass("schedule-reservation-button")){
+      console.log("SCHEDULE RES!")
+    }
     if (currentDropdown) {
       currentDropdown.css("display", "none");
     }
@@ -198,6 +186,24 @@ async function initializeSchedule() {
       console.log("wanna edit or delete this res?");
     }
   });
+
+  $(".schedule-reservation-button").click(function(event){
+    event.stopPropagation();
+    console.log($(this));
+    let tableNumber = $(this).parent().parent().parent().attr("class").split("-")[1];
+    let res = {date : dateTracker, time: time.format("HHmm"), tableNumber};
+    scheduleReservation(res);
+  });
+
+  $(".reschedule-button").click(function(event){
+    console.log("RESCHEDULE BUTTON", $(this));
+  
+  })
+  
+  $(".delete-button").click(function(event){
+    console.log("DELETE BUTTON", $(this));
+  
+  })
 }
 
 $("#date").change(function () {
@@ -219,6 +225,10 @@ $("#date").change(function () {
 
 
 })
+
+
+
+
 
 function buildScheduleGrid() {
   $("#time-rows").empty();
@@ -269,6 +279,8 @@ function buildScheduleGrid() {
 
 
 function scheduleReservation(res) {
+  console.log("Scheduling Reservation!");
+  console.log(res);
   localStorage.setItem("selectedReservation", JSON.stringify(res));
   window.location.href = "confirmreservation.html";
 }
