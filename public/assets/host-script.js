@@ -1,7 +1,9 @@
-let button;
 
+let button;
 let hostDateTracker;
 let currentDropdown;
+let isReschedule = localStorage.getItem("isReschedule") == "true";
+let rescheduleRes;
 async function initializeSchedule() {
   await initializeTables();
   let isReservation = false;
@@ -16,88 +18,22 @@ async function initializeSchedule() {
   </div>
    `;
 
-  function buildDivHTML() {
-    return `<div class=dropdown>
-    <button class="schedule-button ${isReservation ? "res-button" : isAvailable ? "available-button" : "unavailable-button"}"></button>
+  function buildDivHTML(btnText, res) {
+    console.log("-------------isReservation----------", isReservation);
+    
+    
+    let html = `<div class=dropdown>
+    <button class="schedule-button ${isReservation ? "res-button" : isAvailable ? "available-button" : "unavailable-button"}" ${res ? "data-res = " + JSON.stringify(res) : ""}>${btnText}</button>
     ${isReservation ? resButtonDropdown : isAvailable ? availableButtonDropdown : ""}
     </div>`;
+
+    
+    return html;
   };
 
   console.log("initializing schedule!");
 
-  for (let table of insideTables) {
-
-    let timeIterator = moment(earliestResTime, "HHmm");
-    let tableClass = `.table-${table.tableNumber}`;
-    if (table.reservations.length === 0) {
-      while (timeIterator.isBefore(latestResTime) || timeIterator.isSame(latestResTime)) {
-        let rowClass = `.row-${timeIterator.format("HHmm")}`;
-        isAvailable = resCount[timeIterator.format("HHmm")] < 3 ? true : false;
-
-
-        // let button = $("<button>").addClass(isAvailable ? "available-button" : "unavailable-button");
-        // button.addClass("schedule-button");
-        $(rowClass).find(tableClass).html(buildDivHTML());
-
-
-        timeIterator.add(15, "m");
-      }
-    }
-
-    for (let [i, res] of table.reservations.entries()) {
-      while (timeIterator.isBefore(res.time)) {
-        isReservation = false;
-        let rowClass = `.row-${timeIterator.format("HHmm")}`;
-        // let button = $("<button>").addClass("schedule-button");
-        if (res.time.diff(timeIterator, "m") < 90) {
-          // button.addClass("unavailable-button");
-          isAvailable = false;
-        } else if (resCount[timeIterator.format("HHmm")] >= 3) {
-          //button.addClass("unavailable-button");
-          isAvailable = false;
-        } else isAvailable = true; //button.addClass("available-button");
-
-        $(rowClass).find(tableClass).html(buildDivHTML());
-        timeIterator.add(15, "m");
-      }
-
-      if (timeIterator.isSame(res.time)) {
-        console.log("``````````````````````tableclass!", tableClass);
-
-        //let button = $("<button>").addClass("schedule-button res-button");
-        isReservation = true;
-        for (let i = 0; i < 6; i++) {
-          $(`.row-${timeIterator.format("HHmm")}`).find(tableClass).html(buildDivHTML);
-          timeIterator.add(15, "m");
-        }
-
-      }
-      console.log("--------------i=", i);
-      console.log("table.reservations.length", table.reservations.length);
-      if (i === table.reservations.length - 1) {
-        isReservation = false;
-        while (timeIterator.isBefore(latestResTime) || timeIterator.isSame(latestResTime)) {
-          console.log("***************in while loop after reservations");
-          let rowClass = `.row-${timeIterator.format("HHmm")}`;
-          isAvailable = resCount[timeIterator.format("HHmm")] < 3 ? true : false;
-
-          // let button = $("<button>").addClass(isAvailable ? "available-button" : "unavailable-button");
-          //button.addClass("schedule-button");
-          $(rowClass).find(tableClass).html(buildDivHTML);
-
-
-          timeIterator.add(15, "m");
-        }
-      }
-
-    }
-
-  }
-
-  for (let table of outsideTables) {
-    console.log("Looking at outside tables!");
-
-
+  function initializeTableCol(table) {
     let timeIterator = moment(earliestResTime, "HHmm");
     let tableClass = `.table-${table.tableNumber}`;
     if (table.reservations.length === 0) {
@@ -108,7 +44,7 @@ async function initializeSchedule() {
 
         // let button = $("<button>").addClass(isAvailable ? "available-button" : "unavailable-button");
         // button.addClass("schedule-button");
-        $(rowClass).find(tableClass).html(buildDivHTML());
+        $(rowClass).find(tableClass).empty().html(buildDivHTML());
 
 
         timeIterator.add(15, "m");
@@ -116,7 +52,6 @@ async function initializeSchedule() {
     }
 
     for (let [i, res] of table.reservations.entries()) {
-      console.log("-----------------time iterator: ", timeIterator.format("HHmm") + " res.time: " + res.time.format("HHmm"));
       while (timeIterator.isBefore(res.time)) {
         isReservation = false;
         let rowClass = `.row-${timeIterator.format("HHmm")}`;
@@ -129,20 +64,42 @@ async function initializeSchedule() {
           isAvailable = false;
         } else isAvailable = true; //button.addClass("available-button");
 
-        $(rowClass).find(tableClass).html(buildDivHTML());
+        $(rowClass).find(tableClass).empty().html(buildDivHTML());
         timeIterator.add(15, "m");
       }
 
       // console.log("-----------------time iterator: ", timeIterator.format("HHmm") + " res.time: " + res.time.format("HHmm"));
       if (timeIterator.isSame(res.time)) {
+        console.log("``````````````````````tableclass!", tableClass);
+
         //let button = $("<button>").addClass("schedule-button res-button");
         isReservation = true;
-        for (let i = 0; i < 6; i++) {
-          $(`.row-${timeIterator.format("HHmm")}`).find(tableClass).html(buildDivHTML);
-          timeIterator.add(15, "m");
-        }
 
-    
+        res.time = res.time.format("HHmm");
+
+        $(`.row-${timeIterator.format("HHmm")}`).find(tableClass).empty().html(buildDivHTML((res.firstName ? res.firstName : ""), res));
+        timeIterator.add(15, "m");
+
+        $(`.row-${timeIterator.format("HHmm")}`).find(tableClass).empty().html(buildDivHTML(res.lastName, res));
+        timeIterator.add(15, "m");
+
+        $(`.row-${timeIterator.format("HHmm")}`).find(tableClass).empty().html(buildDivHTML(`#ppl: ${res.partyNumber}`, res));
+        timeIterator.add(15, "m");
+
+        console.log("Phone number!", res.phoneNumber);
+        $(`.row-${timeIterator.format("HHmm")}`).find(tableClass).empty().html(buildDivHTML(res.phoneNumber, res));
+        timeIterator.add(15, "m");
+
+        $(`.row-${timeIterator.format("HHmm")}`).find(tableClass).empty().html(buildDivHTML("", res));
+        timeIterator.add(15, "m");
+
+        isReservation = false;
+        isAvailable = false;
+       
+        $(`.row-${timeIterator.format("HHmm")}`).find(tableClass).empty().html(buildDivHTML(""));
+        timeIterator.add(15, "m");
+       
+        res.time = moment(res.time, "HHmm");
 
       }
       console.log("--------------i=", i);
@@ -156,7 +113,7 @@ async function initializeSchedule() {
 
           // let button = $("<button>").addClass(isAvailable ? "available-button" : "unavailable-button");
           // button.addClass("schedule-button");
-          $(rowClass).find(tableClass).html(buildDivHTML);
+          $(rowClass).find(tableClass).empty().html(buildDivHTML);
 
 
           timeIterator.add(15, "m");
@@ -164,6 +121,17 @@ async function initializeSchedule() {
       }
 
     }
+  }
+
+  for (let table of insideTables) {
+  initializeTableCol(table);
+
+  }
+
+  
+  for (let table of outsideTables) {
+    console.log("Looking at outside tables!");
+    initializeTableCol(table);
   }
 
   $(".dropdown").click(function (event) {
@@ -191,20 +159,87 @@ async function initializeSchedule() {
     event.stopPropagation();
     console.log($(this));
     let tableNumber = $(this).parent().parent().parent().attr("class").split("-")[1];
-    let res = {date : dateTracker, time: time.format("HHmm"), tableNumber};
+    let time = $(this).parent().parent().parent().parent().attr("class").split("-")[1];
+    let res = {date : selectedDate.format("MM/DD/YYYY"), time, tableNumber, dayOfWeek};
     scheduleReservation(res);
   });
 
   $(".reschedule-button").click(function(event){
-    console.log("RESCHEDULE BUTTON", $(this));
-  
+    //set isReschedule tracker
+    isReschedule = true;
+    localStorage.setItem("isReschedule", "true");
+
+    //get res data from button's data-res attr
+    let res = JSON.parse($(this).parent().siblings().attr("data-res"));
+    console.log("------------res------------", res);
+    res.time = moment(res.time, "HHmm");
+    res.date = selectedDate.format("MM/DD/YYYY");
+    
+    //set Reschedule Header
+    let html = `Rescheduling ${res.firstName? res.firstName : ""} ${res.lastName}'s Reservation
+    <button class="cancel-reschedule-button">Cancel</button>`;
+    $("#reschedule-header").html(html);
+    $("#reschedule-div").css("display", "block");
+
+    let isInside = parseInt(res.tableNumber) < 100;
+    let tableObj;
+    if (isInside){
+      tableObj = insideTables[insideTables.findIndex(x => x.tableNumber === res.tableNumber)];
+    } else {
+      tableObj = outsideTables[outsideTables.findIndex(x => x.tableNumber === res.tableNumber)];
+    }
+    console.log("res.time", res.time);
+    console.log(tableObj.reservations.findIndex(x => x.time.format("HHmm") === res.time.format("HHmm")));
+    console.log(tableObj.reservations[tableObj.reservations.findIndex(x => x.time.format("HHmm") === res.time.format("HHmm"))]);
+    rescheduleRes = tableObj.reservations.splice(tableObj.reservations.findIndex(x => x.time.format("HHmm") === res.time.format("HHmm")), 1);
+     
+    resCount[res.time.format("HHmm")]--;
+    //update schedule with target res removed
+    console.log("tableObj--------------------", tableObj);
+    //initializeTableCol(tableObj);
+    for (let table of insideTables) {
+      initializeTableCol(table);
+    
+      }
+     
+      for (let table of outsideTables) {
+        console.log("Looking at outside tables!");
+        initializeTableCol(table);
+      }
   })
   
   $(".delete-button").click(function(event){
     console.log("DELETE BUTTON", $(this));
   
   })
+
+
+ 
+  
+  
 }
+
+$(".cancel-reschedule-button").click(function(event){
+  event.stopPropagation();
+  event.preventDefault();
+  console.log("cancel reschedule!")
+  if(selectedDate.format("MM/DD/YYYY") === rescheduleRes.date){
+    let isInside = parseInt(rescheduleRes.tableNumber) < 100;
+    let tableObj;
+    if (isInside) {
+      tableObj = insideTables[insideTables.findIndex(x => x.tableNumber === rescheduleRes.tableNumber)];
+    } else {
+      tableObj = insideTables[insideTables.findIndex(x => x.tableNumber === rescheduleRes.tableNumber)];
+    }
+
+    tableObj.reservations.push(rescheduleRes);
+    initializeTableCol(tableObj);
+  }
+
+  isReschedule = false;
+  localStorage.setItem("isReschedule", "false");
+  $("#reschedule-div").css("display", "none");
+})
 
 $("#date").change(function () {
 
@@ -212,6 +247,8 @@ $("#date").change(function () {
     return;
   }
   hostDateTracker = $(this).val();
+
+  localStorage.setItem("hostDate", $(this).val());
 
   console.log(hostDateTracker);
   // resCount[1600] = 3;
@@ -281,9 +318,16 @@ function buildScheduleGrid() {
 function scheduleReservation(res) {
   console.log("Scheduling Reservation!");
   console.log(res);
-  localStorage.setItem("selectedReservation", JSON.stringify(res));
+  if(isReschedule){
+
+  } else {
+    localStorage.setItem("selectedReservation", JSON.stringify(res));
   window.location.href = "confirmreservation.html";
+  }
+  
 }
+
+
 
 $(window).click(function (event) {
   console.log("click!");
@@ -293,3 +337,19 @@ $(window).click(function (event) {
     currentDropdown = undefined;
   }
 });
+
+
+
+$("#date").val(localStorage.getItem("hostDate"));
+
+if($("#date").val() != ""){
+  selectedDate = moment($("#date").val().replace(/\//g, ""), "L");
+  dayOfWeek = selectedDate.day();
+  updateOperatingHours();
+  initializeResCount();
+  //initializeTables();
+  buildScheduleGrid();
+  initializeSchedule();
+
+}
+
