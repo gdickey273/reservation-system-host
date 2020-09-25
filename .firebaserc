@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "eddy-pub-reservation-system",
+    "host": "reservation-system-host"
+  }
+}
