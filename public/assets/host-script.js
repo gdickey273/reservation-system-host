@@ -26,6 +26,7 @@ async function initializeSchedule() {
     const resButtonDropdown = $("<div>").addClass("dropdown-content");
     resButtonDropdown.append($("<button>").addClass("reschedule-button").text("Reschedule"));
     resButtonDropdown.append($("<button>").addClass("delete-button").text("Delete Reservation"));
+    resButtonDropdown.append($("<button>").addClass("details-button").text("View Details"));
 
     const availableButtonDropdown = $("<div>").addClass("dropdown-content");
     availableButtonDropdown.append($("<button>").addClass("schedule-reservation-button").text("Schedule Reservation"));
@@ -233,7 +234,9 @@ function listen() {
       reservations: 
       firebase.firestore.FieldValue.arrayRemove(deleteRes)
     }).then(()=> {
+      
       $("#delete-res-text").text("Reservation Deleted!");
+      location.reload();
     })
   })
 
@@ -260,6 +263,18 @@ function listen() {
 
   $(".cancel-reschedule-button").click(function (event) {
     location.reload();
+  })
+
+  $(".details-button").click(function(event){
+    let res = $(this).parent().siblings().data("res");
+    $("#res-details-text").html(`<ul> <li>Table: ${res.tableNumber} </li>
+    <li>Time: ${res.time.format("h:mm A")} </li>
+    <li>Name: ${res.firstName} ${res.lastName}</li> 
+    <li>Party Number: ${res.partyNumber}</li>
+    <li>Phone Number: ${res.phoneNumber}</li>
+    <li>Email: ${res.emailAddress}</li>
+    <li>Notes: ${res.notes}</li> </ul>`);
+    $("#details-pop-up").css("display", "block");
   })
 
   $(".dropdown").click(function (event) {
@@ -379,8 +394,12 @@ $(window).click(function (event) {
   }
 });
 
-$("#escape-delete").click(function(event){
-  $("#delete-pop-up").css("display", "none");
+// $("#escape-delete").click(function(event){
+//   $("#delete-pop-up").css("display", "none");
+// })
+
+$(".escape").click(function(event){
+  $(".pop-up").css("display", "none");
 })
 
 $("#date").val(localStorage.getItem("hostDate"));

@@ -9,12 +9,22 @@ body{
 .reschedule-button{
   z-index: 10;
   position: absolute;
+  margin-left: 100px;
   height: 40px;
 }
 
 .delete-button{
   z-index: 10;
+  margin-top:80px;
+  margin-left: 100px;
+  position: absolute;
+  height: 40px;
+}
+
+.details-button{
+  z-index: 10;
   margin-top:40px;
+  margin-left: 100px;
   position: absolute;
   height: 40px;
 }
@@ -22,6 +32,7 @@ body{
 .schedule-reservation-button{
   z-index: 10;
   position: absolute;
+  margin-left: 100px;
   height: 40px;
 }
 
@@ -86,7 +97,7 @@ th td{
   display: inline-block;
 }
 
-#delete-pop-up{
+.pop-up{
   position: fixed;
   left: 30%;
   top: 250px;
@@ -97,6 +108,10 @@ th td{
   margin-right: auto;
 }
 
-#escape-delete{
+.escape{
   float: right;
+}
+
+#details-pop-up{
+  line-height: 1.5;
 }

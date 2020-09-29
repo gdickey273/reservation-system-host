@@ -66,14 +66,23 @@
 
   </table>
   
-  <div class="card" id="delete-pop-up">
+  <div class="card pop-up" id="delete-pop-up">
     <div class="card-body">
-      <button class="btn btn-primary" id="escape-delete">X</button>
+      <button class="btn btn-primary escape" id="escape-delete">X</button>
       <h5 class="card-title">Delete Reservation?</h5>
       <p class="card-text" id="delete-res-text"></p>
       <button class="btn btn-danger" id="confirm-delete">Delete</button>
     </div>
   </div>
+
+  <div class="card pop-up" id="details-pop-up">
+    <div class="card-body">
+      <button class="btn btn-primary escape" id="escape-details">X</button>
+      <h5 class="card-title">Reservation Details</h5>
+      <p class="card-text" id="res-details-text"></p>
+    </div>
+  </div>
+  
 
 
   <!-- The core Firebase script -->
