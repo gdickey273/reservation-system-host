@@ -217,11 +217,6 @@ function checkInputValidity() {
 }
 
 async function makeReservation() {
-  if (isReschedule) {
-    await cloud.doc(originalResPath).update({
-      reservations:
-      firebase.firestore.FieldValue.arrayRemove(originalResObj)})
-  }
   console.log("----making reservation!----");
   var path = "scheduleByDate/" + formattedDate + "/" + insideOutside + "/" + tableNumber;
   reservationData = {
@@ -234,27 +229,46 @@ async function makeReservation() {
     tableNumber,
     notes
   };
+  
+  if (isReschedule) {
+    let batch = cloud.batch();
 
-  cloud.doc(path).update({
+    batch.update(cloud.doc(originalResPath), {reservations : firebase.firestore.FieldValue.arrayRemove(originalResObj)});
+    batch.update(cloud.doc(path), {reservations : firebase.firestore.FieldValue.arrayUnion(reservationData)});
 
-    reservations:
-      firebase.firestore.FieldValue.arrayUnion(reservationData)
-  }).then(() => {
-    reservationData.dayOfWeek = dayOfWeek;
-    reservationData.date = date;
-    localStorage.setItem("confirmedReservation", JSON.stringify(reservationData));
+    await batch.commit()
+    .then(() => {
+      console.log("success!")
+      })
+    .catch(err => console.log("Failed!", err));
 
-    cloud.collection('mail').add({
-      to: emailAddress,
-      message: {
-        subject: `The Eddy Pub Reservation Confirmation`,
-        html: `<img src='./images/eddy-logo-transparent.png' alt='The Eddy Logo'><br>
-        <h2>Thank you for booking a reservation with us at the Eddy Pub! We've got you down for ${partyNumber} ${partyNumber > 1 ? "people" : "person"} on 
-        ${dayOfWeek}, ${reservationData.date} at ${desiredTime.format("h:mm A")} under the name ${firstName} ${lastName}. 
-        We'll see you then!</h2>`
-      }
-    }).then()//() => window.location.href = "confirmation.html");
-  });
+    // await cloud.doc(originalResPath).update({
+    //   reservations:
+    //   firebase.firestore.FieldValue.arrayRemove(originalResObj)})
+  } else {
+    await cloud.doc(path).update({
+      reservations:
+        firebase.firestore.FieldValue.arrayUnion(reservationData)
+    });
+  }
+
+  reservationData.dayOfWeek = dayOfWeek;
+  reservationData.date = date;
+  localStorage.setItem("confirmedReservation", JSON.stringify(reservationData));
+
+  cloud.collection('mail').add({
+    to: emailAddress,
+    message: {
+      subject: `The Eddy Pub Reservation Confirmation`,
+      html: `<img src='./images/eddy-logo-transparent.png' alt='The Eddy Logo'><br>
+      <h2>Thank you for booking a reservation with us at the Eddy Pub! We've got you down for ${partyNumber} ${partyNumber > 1 ? "people" : "person"} on 
+      ${dayOfWeek}, ${reservationData.date} at ${desiredTime.format("h:mm A")} under the name ${firstName} ${lastName}. 
+      We'll see you then!</h2>`
+    }
+  })//() => window.location.href = "confirmation.html");
+  
+
+  
 
 
 

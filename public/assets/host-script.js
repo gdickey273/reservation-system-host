@@ -233,8 +233,8 @@ function listen() {
       scheduleReservation(rescheduleRes[0]);
     } else {
       let tableNumber = $(this).parent().parent().parent().attr("class").split("-")[1];
-      let time = $(this).parent().parent().parent().parent().attr("class").split("-")[1];
-      let res = { date: selectedDate.format("MM/DD/YYYY"), time, tableNumber, dayOfWeek };
+      let desiredTime = $(this).parent().parent().parent().parent().attr("class").split("-")[1];
+      let res = { date: selectedDate.format("MM/DD/YYYY"), desiredTime, tableNumber, dayOfWeek };
       scheduleReservation(res);
     }
 
