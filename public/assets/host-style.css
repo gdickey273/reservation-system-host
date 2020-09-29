@@ -85,3 +85,18 @@ th td{
   z-index: 10;
   display: inline-block;
 }
+
+#delete-pop-up{
+  position: fixed;
+  left: 30%;
+  top: 250px;
+  display: none;
+  z-index: 11;
+  width: 40%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#escape-delete{
+  float: right;
+}

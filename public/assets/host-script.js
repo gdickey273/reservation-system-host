@@ -4,6 +4,9 @@ let hostDateTracker;
 let currentDropdown;
 let isReschedule = false;//localStorage.getItem("isReschedule") == "true";
 let rescheduleRes;
+let deleteRes;
+
+
 async function initializeSchedule() {
   await initializeTables();
   let isReservation = false;
@@ -216,8 +219,22 @@ function listen() {
   })
 
   $(".delete-button").click(function (event) {
-    console.log("DELETE BUTTON", $(this));
+    deleteRes = $(this).parent().siblings().data("res");
+    $("#delete-pop-up").css("display", "block");
+    $("#delete-res-text").text(`Table ${deleteRes.tableNumber} at ${deleteRes.time.format("h:mm A")}
+    ${deleteRes.firstName} ${deleteRes.lastName} party of ${deleteRes.partyNumber}`)
+  })
 
+  $("#confirm-delete").click(function(event){
+    deleteRes.time = parseInt(deleteRes.time.format("HHmm"));
+    let insideOutside = deleteRes.tableNumber < 100 ? "insideTables" : "outsideTables";
+    let path = `scheduleByDate/${selectedDate.format("MMDDYYYY")}/${insideOutside}/${deleteRes.tableNumber}`
+    cloud.doc(path).update({
+      reservations: 
+      firebase.firestore.FieldValue.arrayRemove(deleteRes)
+    }).then(()=> {
+      $("#delete-res-text").text("Reservation Deleted!");
+    })
   })
 
   $(".schedule-reservation-button").click(function (event) {
@@ -243,25 +260,6 @@ function listen() {
 
   $(".cancel-reschedule-button").click(function (event) {
     location.reload();
-    // event.stopPropagation();
-    // event.preventDefault();
-    // console.log("cancel reschedule!")
-    // if (selectedDate.format("MM/DD/YYYY") === rescheduleRes.date) {
-    //   let isInside = parseInt(rescheduleRes.tableNumber) < 100;
-    //   let tableObj;
-    //   if (isInside) {
-    //     tableObj = insideTables[insideTables.findIndex(x => x.tableNumber === rescheduleRes.tableNumber)];
-    //   } else {
-    //     tableObj = insideTables[insideTables.findIndex(x => x.tableNumber === rescheduleRes.tableNumber)];
-    //   }
-
-    //   tableObj.reservations.push(rescheduleRes);
-    //   initializeTableCol(tableObj);
-    // }
-
-    // isReschedule = false;
-    // localStorage.setItem("isReschedule", "false");
-    // $("#reschedule-div").css("display", "none");
   })
 
   $(".dropdown").click(function (event) {
@@ -381,7 +379,9 @@ $(window).click(function (event) {
   }
 });
 
-
+$("#escape-delete").click(function(event){
+  $("#delete-pop-up").css("display", "none");
+})
 
 $("#date").val(localStorage.getItem("hostDate"));
 
