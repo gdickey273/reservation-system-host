@@ -24,12 +24,12 @@ async function initializeSchedule() {
 
   function buildDivHTML(btnText, res) {
     const resButtonDropdown = $("<div>").addClass("dropdown-content");
-    resButtonDropdown.append($("<button>").addClass("reschedule-button").text("Reschedule"));
-    resButtonDropdown.append($("<button>").addClass("delete-button").text("Delete Reservation"));
-    resButtonDropdown.append($("<button>").addClass("details-button").text("View Details"));
+    resButtonDropdown.append($("<button>").addClass("reschedule-button dropdown-button").text("Reschedule"));
+    resButtonDropdown.append($("<button>").addClass("delete-button dropdown-button").text("Delete Reservation"));
+    resButtonDropdown.append($("<button>").addClass("details-button dropdown-button").text("View Details"));
 
     const availableButtonDropdown = $("<div>").addClass("dropdown-content");
-    availableButtonDropdown.append($("<button>").addClass("schedule-reservation-button").text("Schedule Reservation"));
+    availableButtonDropdown.append($("<button>").addClass("schedule-reservation-button dropdown-button").text("Schedule Reservation"));
 
     console.log("-------------isReservation----------", isReservation);
 
@@ -115,7 +115,7 @@ async function initializeSchedule() {
         $(`.row-${timeIterator.format("HHmm")}`).find(tableClass).empty().append(buildDivHTML(res.phoneNumber, res));//.html(buildDivHTML(res.phoneNumber, res));
         timeIterator.add(15, "m");
 
-        $(`.row-${timeIterator.format("HHmm")}`).find(tableClass).empty().append(buildDivHTML("", res));//.html(buildDivHTML("", res));
+        $(`.row-${timeIterator.format("HHmm")}`).find(tableClass).empty().append(buildDivHTML(`${res.notes.length > 0 ? "*Notes*" : ""}`, res));//.html(buildDivHTML("", res));
         timeIterator.add(15, "m");
 
         isReservation = false;
@@ -235,8 +235,10 @@ function listen() {
       firebase.firestore.FieldValue.arrayRemove(deleteRes)
     }).then(()=> {
       
-      $("#delete-res-text").text("Reservation Deleted!");
-      location.reload();
+    deleteRes.type = "delete";
+    deleteRes.date = selectedDate.format("MM/DD/YYYY");
+    localStorage.setItem("resData", JSON.stringify(deleteRes));
+    window.location.href = "confirmation.html";
     })
   })
 
@@ -249,12 +251,14 @@ function listen() {
       rescheduleRes[0].desiredTime = $(this).parent().parent().parent().parent().attr("class").split("-")[1].split(" ")[0];
       rescheduleRes[0].date = selectedDate.format("MM/DD/YYYY");
       rescheduleRes[0].dayOfWeek = dayOfWeek;
-      rescheduleRes[0].tableNumber = $(this).parent().parent().parent().attr("class").split("-")[1];
+      rescheduleRes[0].desiredTableNumber = $(this).parent().parent().parent().attr("class").split("-")[1];
+      rescheduleRes[0].originalTableNumber = rescheduleRes[0].tableNumber;
       scheduleReservation(rescheduleRes[0]);
     } else {
-      let tableNumber = $(this).parent().parent().parent().attr("class").split("-")[1];
-      let desiredTime = $(this).parent().parent().parent().parent().attr("class").split("-")[1];
-      let res = { date: selectedDate.format("MM/DD/YYYY"), desiredTime, tableNumber, dayOfWeek };
+      let desiredTableNumber = $(this).parent().parent().parent().attr("class").split("-")[1];
+      let desiredTime = $(this).parent().parent().parent().parent().attr("class").split("-")[1].split(" ")[0];
+      let res = { date: selectedDate.format("MM/DD/YYYY"), desiredTime, desiredTableNumber, dayOfWeek };
+      test = $(this);
       scheduleReservation(res);
     }
 
@@ -278,6 +282,7 @@ function listen() {
   })
 
   $(".dropdown").click(function (event) {
+    console.log($(this).offset())
     event.stopPropagation();
     event.stopImmediatePropagation();
     console.log($(this));
@@ -288,8 +293,19 @@ function listen() {
     if (currentDropdown) {
       currentDropdown.css("display", "none");
     }
+
+
+    test = $(this);
+    if($(window).width() - $(this).offset().left - $(this).width() < 100){
+      console.log('nope!');
+      $('.dropdown-button').css('left', "").css('right', $(this).width());
+    } else {
+      $('.dropdown-button').css('right', "").css('left', $(this).width());
+    }
+
     currentDropdown = $(this).find(".dropdown-content");
     currentDropdown.css("display", "block");
+    
     //If its an available or res button, add dropdown
     if ($(this).hasClass("available-button")) {
       console.log($(this));
@@ -378,16 +394,13 @@ function buildScheduleGrid() {
 function scheduleReservation(res) {
   console.log("Scheduling Reservation!");
   console.log(res);
-
-  localStorage.setItem("selectedReservation", JSON.stringify(res));
+  localStorage.setItem("resData", JSON.stringify(res));
   window.location.href = "confirmreservation.html";
 }
 
 
 
 $(window).click(function (event) {
-  console.log("click!");
-  console.log($(this));
   if (currentDropdown) {
     currentDropdown.css("display", "none");
     currentDropdown = undefined;

@@ -1,3 +1,9 @@
+button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  }
+
 body{
   line-height: 1rem !important;
 }
@@ -6,34 +12,22 @@ body{
   background-color: #aaa;
 }
 
-.reschedule-button{
+.dropdown-button{
   z-index: 10;
   position: absolute;
-  margin-left: 100px;
   height: 40px;
+  width: 100px;
 }
+/* .reschedule-button, .delete-button, .details-button, .schedule-reservation-button {
+  
+} */
 
 .delete-button{
-  z-index: 10;
   margin-top:80px;
-  margin-left: 100px;
-  position: absolute;
-  height: 40px;
 }
 
 .details-button{
-  z-index: 10;
   margin-top:40px;
-  margin-left: 100px;
-  position: absolute;
-  height: 40px;
-}
-
-.schedule-reservation-button{
-  z-index: 10;
-  position: absolute;
-  margin-left: 100px;
-  height: 40px;
 }
 
 .col{

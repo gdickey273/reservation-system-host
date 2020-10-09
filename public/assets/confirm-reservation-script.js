@@ -1,13 +1,14 @@
-let reservationData = JSON.parse(localStorage.getItem("selectedReservation"));
+let reservationData = JSON.parse(localStorage.getItem("resData"));
 let partyNumber;
 const originalTime = moment(reservationData.time, "HHmm");
 const desiredTime = moment(reservationData.desiredTime, "HHmm");
 
 const date = reservationData.date;
 var formattedDate = date.replace("/", "").replace("/", "");
-const tableNumber = reservationData.tableNumber;
-const isInside = tableNumber < 100;
-let insideOutside;
+const originalTableNumber = reservationData.originalTableNumber;
+const desiredTableNumber = reservationData.desiredTableNumber;
+const  originalInsideOutside = originalTableNumber < 100 ? "insideTables" : "outsideTables";
+const  desiredInsideOutside = desiredTableNumber < 100 ? "insideTables" : "outsideTables";
 let dayOfWeek = reservationData.dayOfWeek;
 let firstName;
 let lastName;
@@ -21,7 +22,6 @@ let isReschedule = localStorage.getItem("isReschedule") === "true";
 const cloud = firebase.firestore();
 
 function initializeWithRescheduleInfo() {
-  insideOutside = isInside ? "insideTables" : "outsoutsideTableside";
   if (isReschedule) {
     partyNumber = reservationData.partyNumber;
     $("#party-number").val(partyNumber);
@@ -43,16 +43,16 @@ function initializeWithRescheduleInfo() {
       partyNumber,
       phoneNumber,
       emailAddress,
-      tableNumber,
+      tableNumber: originalTableNumber,
       notes
     }
-    originalResPath = `scheduleByDate/${formattedDate}/${insideOutside}/${reservationData.tableNumber}`;
+    originalResPath = `scheduleByDate/${formattedDate}/${originalInsideOutside}/${reservationData.originalTableNumber}`;
   
-    cloud.doc(originalResPath).update({
-      reservations:
-      firebase.firestore.FieldValue.arrayRemove(originalResObj)}).then(()=>{
-        console.log("Attempted to delete original res!");
-      });
+    // cloud.doc(originalResPath).update({
+    //   reservations:
+    //   firebase.firestore.FieldValue.arrayRemove(originalResObj)}).then(()=>{
+    //     console.log("Attempted to delete original res!");
+    //   });
   }
 
 }
@@ -87,12 +87,12 @@ switch (dayOfWeek) {
 }
 
 function updatePage() {
-  let str = `Creating reservation on ${dayOfWeek}, ${date} at ${desiredTime.format("h:mm A")} at Table ${tableNumber}`;
+  let str = `Creating reservation on ${dayOfWeek}, ${date} at ${desiredTime.format("h:mm A")} at Table ${desiredTableNumber}`;
 
   $("#header").html(str);
 
 
-  var path = "scheduleByDate/" + formattedDate + "/" + insideOutside + "/" + tableNumber;
+  var path = "scheduleByDate/" + formattedDate + "/" + desiredInsideOutside + "/" + desiredTableNumber;
   var ref = cloud.doc(path); //.doc(formattedDate);
   ref.get().then(function (snapshot) {
     console.log("--------snapshot!-----", snapshot);
@@ -218,7 +218,7 @@ function checkInputValidity() {
 
 async function makeReservation() {
   console.log("----making reservation!----");
-  var path = "scheduleByDate/" + formattedDate + "/" + insideOutside + "/" + tableNumber;
+  var path = "scheduleByDate/" + formattedDate + "/" + desiredInsideOutside + "/" + desiredTableNumber;
   reservationData = {
     time: parseInt(desiredTime.format("HHmm")),
     firstName,
@@ -226,11 +226,14 @@ async function makeReservation() {
     partyNumber,
     phoneNumber,
     emailAddress,
-    tableNumber,
+    tableNumber: desiredTableNumber,
     notes
   };
+
+  
   
   if (isReschedule) {
+    //reservationData.time = parseInt(desiredTime.format("HHmm"))
     let batch = cloud.batch();
 
     batch.update(cloud.doc(originalResPath), {reservations : firebase.firestore.FieldValue.arrayRemove(originalResObj)});
@@ -238,34 +241,38 @@ async function makeReservation() {
 
     await batch.commit()
     .then(() => {
-      console.log("success!")
+      console.log("success!");
+      sendConfirmationEmail();
       })
     .catch(err => console.log("Failed!", err));
 
-    // await cloud.doc(originalResPath).update({
-    //   reservations:
-    //   firebase.firestore.FieldValue.arrayRemove(originalResObj)})
   } else {
-    await cloud.doc(path).update({
+    cloud.doc(path).update({
       reservations:
         firebase.firestore.FieldValue.arrayUnion(reservationData)
-    });
+    }).then(() => sendConfirmationEmail());
   }
 
-  reservationData.dayOfWeek = dayOfWeek;
-  reservationData.date = date;
-  localStorage.setItem("confirmedReservation", JSON.stringify(reservationData));
-
-  cloud.collection('mail').add({
-    to: emailAddress,
-    message: {
-      subject: `The Eddy Pub Reservation Confirmation`,
-      html: `<img src='./images/eddy-logo-transparent.png' alt='The Eddy Logo'><br>
-      <h2>Thank you for booking a reservation with us at the Eddy Pub! We've got you down for ${partyNumber} ${partyNumber > 1 ? "people" : "person"} on 
-      ${dayOfWeek}, ${reservationData.date} at ${desiredTime.format("h:mm A")} under the name ${firstName} ${lastName}. 
-      We'll see you then!</h2>`
-    }
-  })//() => window.location.href = "confirmation.html");
+  function sendConfirmationEmail(){
+    reservationData.dayOfWeek = dayOfWeek;
+    reservationData.date = date;
+    reservationData.type = isReschedule ? "Reschedule" : "Schedule";
+    localStorage.setItem("resData", JSON.stringify(reservationData));
+  
+    cloud.collection('mail').add({
+      to: emailAddress,
+      message: {
+        subject: `The Eddy Pub Reservation Confirmation`,
+        html: `<img src='./images/eddy-logo-transparent.png' alt='The Eddy Logo'><br>
+        <h2>Thank you for booking a reservation with us at the Eddy Pub! We've got you down for ${partyNumber} ${partyNumber > 1 ? "people" : "person"} on 
+        ${dayOfWeek}, ${reservationData.date} at ${desiredTime.format("h:mm A")} under the name ${firstName} ${lastName}. 
+        We'll see you then!</h2>`
+      }
+    }).then(() => {
+      window.location.href = "confirmation.html";
+    });
+  }
+ 
   
 
   

@@ -1,3 +1,11 @@
+button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  opacity: 1;
+  background-color: #999;
+  }
+
 header img{
   height: 10rem;
   width: auto;
