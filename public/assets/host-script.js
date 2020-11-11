@@ -239,7 +239,7 @@ function listen() {
         message: {
           subject: `DELETED RESERVATION ${lastName} ${reservationData.date}`,
           html: `<h2> RESERVATION DELETED! ${partyNumber} ${partyNumber > 1 ? "people" : "person"} on 
-          ${dayOfWeek}, ${reservationData.date} at ${desiredTime.format("h:mm A")} under the name ${firstName} ${lastName}. 
+          ${dayOfWeek}, ${reservationData.date} at ${desiredTime.format("h:mm A")} under the name ${deleteRes.firstName} ${deleteRes.lastName}. 
           </h2>`
         }
       }).then(() => {
