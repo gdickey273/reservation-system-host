@@ -157,15 +157,24 @@ function checkInputValidity() {
   //   }
   // });
 
+  
   if ($("#party-number").val() === "") {
     $("#party-number-error-message").html("Field cannot be left blank!");
     isValid = false;
   }
 
-  if ($("#last-name").val() === "") {
-    $("#last-name-error-message").html("Field cannot be left blank!");
-    isValid = false;
+  if($("#first-name").val() === "" && $("#last-name").val() === ""){
+    if ($("#last-name").val() === "") {
+      $("#last-name-error-message").html("Field cannot be left blank!");
+      isValid = false;
+    }
+    if ($("#first-name").val() === "") {
+      $("#last-name-error-message").html("Field cannot be left blank!");
+      isValid = false;
+    }
+
   }
+  
 
   // for (let char of firstNameInputVal){
   //   if (validNameChars.indexOf(char) === -1){
