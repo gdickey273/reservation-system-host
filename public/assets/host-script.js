@@ -233,16 +233,18 @@ function listen() {
     cloud.doc(path).update({
       reservations:
         firebase.firestore.FieldValue.arrayRemove(deleteRes)
-    }).then(() => {
+    })
+    .then(() => {
       cloud.collection('mail').add({
         to: "eddyreservationlog@gmail.com",
         message: {
-          subject: `DELETED RESERVATION ${lastName} ${reservationData.date}`,
-          html: `<h2> RESERVATION DELETED! ${partyNumber} ${partyNumber > 1 ? "people" : "person"} on 
-          ${dayOfWeek}, ${reservationData.date} at ${desiredTime.format("h:mm A")} under the name ${deleteRes.firstName} ${deleteRes.lastName}. 
+          subject: `DELETED RESERVATION ${deleteRes.lastName} ${reservationData.date}`,
+          html: `<h2> RESERVATION DELETED! ${deleteRes.partyNumber} ${deleteRes.partyNumber > 1 ? "people" : "person"} on 
+          ${deleteRes.dayOfWeek}, ${selectedDate.format("MM/DD/YYYY")} at ${deleteRes.time.format("h:mm A")} under the name ${deleteRes.firstName} ${deleteRes.lastName}. 
           </h2>`
         }
-      }).then(() => {
+      })
+      .then(() => {
 
         deleteRes.type = "delete";
         deleteRes.date = selectedDate.format("MM/DD/YYYY");
