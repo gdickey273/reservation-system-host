@@ -2,6 +2,9 @@
 <html>
 
 <head>
+   <!-- jQuery script -->
+   <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+
   <!-- Date Picker stylesheet -->
   <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css" />
@@ -82,6 +85,19 @@
       <p class="card-text" id="res-details-text"></p>
     </div>
   </div>
+
+  <div class="modal" id="confirm-schedule">
+    <div class="modal-content">
+      <div class="modal-body">
+        It looks like this time isn't available at this table per our usual scheduling guidelines. Would you like to make a reservation anyway? 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primar" id="confirm-button">Schedule Reservation</button>
+      </div>
+    </div>
+    
+  </div>
   
 
 
@@ -113,12 +129,11 @@
 
   </script>
 
+  <!-- Bootstrap -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
   <!-- Font Awesome script -->
   <script src="https://use.fontawesome.com/1b460214a3.js"></script>
-
-  <!-- jQuery script -->
-  <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 
   <!-- Time picker script -->
   <script type="text/javascript" src="./assets/wickedpicker.js"></script>

@@ -1,11 +1,26 @@
+@media print{
+  @page {size: landscape}
+
+}
+
+div {
+  -webkit-appearance: none;
+}
+
 button {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+  background-color: white;
   }
 
 body{
   line-height: 1rem !important;
+}
+
+.table-capacity{
+  font-size: small;
+  font-weight: normal;
 }
 .time-lable{
   height: 15px;
@@ -60,9 +75,10 @@ body{
 
 .res-button{
   background-color: #759aab;
-  /* margin-bottom: -100px; */
-  
- 
+}
+
+.res-button-text{
+  padding-bottom: 5px;
 }
 
 .available-button{
@@ -97,6 +113,15 @@ th td{
   top: 250px;
   display: none;
   z-index: 11;
+  width: 40%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.modal{
+  position: fixed;
+  left: 30%;
+  top: 250px;
   width: 40%;
   margin-left: auto;
   margin-right: auto;

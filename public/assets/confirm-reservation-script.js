@@ -114,6 +114,9 @@ function updatePage() {
       var ref102 = cloud.collection("scheduleByDate").doc(formattedDate).collection("outsideTables").doc("102");
       batch.set(ref102, { reservations: [] });
 
+      var ref103 = cloud.collection("scheduleByDate").doc(formattedDate).collection("outsideTables").doc("103");
+      batch.set(ref103, {reservations : []});
+
       var ref105 = cloud.collection("scheduleByDate").doc(formattedDate).collection("outsideTables").doc("105");
       batch.set(ref105, { reservations: [] });
 

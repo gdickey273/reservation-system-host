@@ -35,14 +35,15 @@ async function initializeSchedule() {
 
     let parentDiv = $("<div>").addClass("dropdown");
     let buttonClass = `schedule-button ${isReservation ? "res-button" : isAvailable ? "available-button" : "unavailable-button"}`;
-    let buttonChild = $("<button>").text(btnText).addClass(buttonClass);
+    let buttonChild = $("<button>").addClass(buttonClass);
+    let pChild = $("<p>").text(btnText).addClass("res-button-text");
+    buttonChild.append(pChild);
     if (res) {
       console.log("its a reservation! Should be appending data res and resButtonDropdown", resButtonDropdown);
       buttonChild.data("res", res);
       parentDiv.append(resButtonDropdown);
-      test = buttonChild;
     } else {
-      if (isAvailable) parentDiv.append(availableButtonDropdown);
+      parentDiv.append(availableButtonDropdown);
     }
 
     parentDiv.append(buttonChild);
@@ -121,7 +122,7 @@ async function initializeSchedule() {
         isReservation = false;
         isAvailable = false;
 
-        $(`.row-${timeIterator.format("HHmm")}`).find(tableClass).empty().append(buildDivHTML("", res));//.empty().html(buildDivHTML(""));
+        $(`.row-${timeIterator.format("HHmm")}`).find(tableClass).empty().append(buildDivHTML(""));//.empty().html(buildDivHTML(""));
         timeIterator.add(15, "m");
 
         res.time = moment(res.time, "HHmm");
@@ -176,7 +177,6 @@ function listen() {
       localStorage.setItem("isReschedule", "true");
 
       //get res data from button's data-res attr
-      test=$(this);
       let res = $(this).parent().siblings().data("res");
       console.log("------------res------------", res);
       //res.time = moment(res.time, "HHmm");
@@ -242,25 +242,35 @@ function listen() {
     })
   })
 
-  $(".schedule-reservation-button").click(function (event) {
-    event.stopPropagation();
-    console.log($(this));
+
+  function buildReservation (jQueryEl) {
     if (isReschedule) {
-      test = $(this);
       rescheduleRes[0].time = rescheduleRes[0].time.format("HHmm");
-      rescheduleRes[0].desiredTime = $(this).parent().parent().parent().parent().attr("class").split("-")[1].split(" ")[0];
+      rescheduleRes[0].desiredTime = jQueryEl.parent().parent().parent().parent().attr("class").split("-")[1].split(" ")[0];
       rescheduleRes[0].date = selectedDate.format("MM/DD/YYYY");
       rescheduleRes[0].dayOfWeek = dayOfWeek;
-      rescheduleRes[0].desiredTableNumber = $(this).parent().parent().parent().attr("class").split("-")[1];
+      rescheduleRes[0].desiredTableNumber = jQueryEl.parent().parent().parent().attr("class").split("-")[1];
       rescheduleRes[0].originalTableNumber = rescheduleRes[0].tableNumber;
       scheduleReservation(rescheduleRes[0]);
     } else {
-      let desiredTableNumber = $(this).parent().parent().parent().attr("class").split("-")[1];
-      let desiredTime = $(this).parent().parent().parent().parent().attr("class").split("-")[1].split(" ")[0];
+      let desiredTableNumber = jQueryEl.parent().parent().parent().attr("class").split("-")[1];
+      let desiredTime = jQueryEl.parent().parent().parent().parent().attr("class").split("-")[1].split(" ")[0];
       let res = { date: selectedDate.format("MM/DD/YYYY"), desiredTime, desiredTableNumber, dayOfWeek };
-      test = $(this);
       scheduleReservation(res);
     }
+  }
+  $(".schedule-reservation-button").click(function (event) {
+    event.stopPropagation();
+    let el = $(this);
+
+    if ($(this).parent().siblings(".unavailable-button").length) {
+      console.log("get that modal bby");
+      $("#confirm-schedule").modal("show");
+      $("#confirm-button").click(function (){
+        console.log("lcick");
+        buildReservation(el);
+      })
+    } else buildReservation($(this));
 
   });
 
@@ -295,7 +305,6 @@ function listen() {
     }
 
 
-    test = $(this);
     if($(window).width() - $(this).offset().left - $(this).width() < 100){
       console.log('nope!');
       $('.dropdown-button').css('left', "").css('right', $(this).width());
@@ -348,18 +357,19 @@ function buildScheduleGrid() {
   console.log("building schedule grid!");
   $("#schedule-table").html(`<tr id="header-row">
   <th></th>
-  <th class="table-1">Table 1</th>
-  <th class="table-2">Table 2</th>
-  <th class="table-3">Table 3</th>
-  <th class="table-4">Table 4</th>
-  <th class="table-5">Table 5</th>
-  <th class="table-6">Table 6</th>
-  <th class="table-7">Table 7</th>
-  <th class="table-8">Table 8</th>
-  <th class="table-100">Table 100</th>
-  <th class="table-102">Table 102</th>
-  <th class="table-105">Table 105</th>
-  <th class="table-106">Table 106</th>
+  <th class="table-1"> Table-1<span class='table-capacity'>(2)</span></th>
+  <th class="table-2"> Table-2<span class='table-capacity'>(2)</span></th>
+  <th class="table-3"> Table-3<span class='table-capacity'>(4)</span></th>
+  <th class="table-4"> Table-4<span class='table-capacity'>(4)</span></th>
+  <th class="table-5"> Table-5<span class='table-capacity'>(6)</span></th>
+  <th class="table-6"> Table-6<span class='table-capacity'>(4)</span></th>
+  <th class="table-7"> Table-7<span class='table-capacity'>(4)</span></th>
+  <th class="table-8"> Table-8<span class='table-capacity'>(6)</span></th>
+  <th class="table-100"> Table-100<span class='table-capacity'>(4)</span></th>
+  <th class="table-102"> Table-102<span class='table-capacity'>(4)</span></th>
+  <th class="table-103"> Table-103<span class='table-capacity'>(4)</span></th>
+  <th class="table-105"> Table-105<span class='table-capacity'>(4)</span></th>
+  <th class="table-106"> Table-106<span class='table-capacity'>(6)</span></th>
 </tr>`);
   let timeIterator = moment(earliestResTime, "HHmm");
   while (timeIterator.isBefore(latestResTime) || timeIterator.isSame(latestResTime)) {
@@ -376,6 +386,7 @@ function buildScheduleGrid() {
       <td class="table-8"></td>
       <td class="table-100"></td>
       <td class="table-102"></td>
+      <td class="table-103"></td>
       <td class="table-105"></td>
       <td class="table-106"></td>`
 
