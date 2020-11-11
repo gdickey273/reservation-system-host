@@ -240,7 +240,7 @@ function listen() {
         message: {
           subject: `DELETED RESERVATION ${deleteRes.lastName ? deleteRes.lastName : ""} ${selectedDate.format("MM/DD/YYYY")}`,
           html: `<h2> RESERVATION DELETED! ${deleteRes.partyNumber} ${deleteRes.partyNumber > 1 ? "people" : "person"} on 
-          ${deleteRes.dayOfWeek}, ${selectedDate.format("MM/DD/YYYY")} at ${deleteRes.time} under the name ${deleteRes.firstName ? deleteRes.firstName : ""} ${deleteRes.lastName ? deleteRes.lastName : ""}. 
+         ${selectedDate.format("MM/DD/YYYY")} at ${deleteRes.time} under the name ${deleteRes.firstName ? deleteRes.firstName : ""} ${deleteRes.lastName ? deleteRes.lastName : ""}. 
           </h2>`
         }
       })
