@@ -238,7 +238,7 @@ function listen() {
       cloud.collection('mail').add({
         to: "eddyreservationlog@gmail.com",
         message: {
-          subject: `DELETED RESERVATION ${deleteRes.lastName} ${reservationData.date}`,
+          subject: `DELETED RESERVATION ${deleteRes.lastName} ${selectedDate.format("MM/DD/YYYY")}`,
           html: `<h2> RESERVATION DELETED! ${deleteRes.partyNumber} ${deleteRes.partyNumber > 1 ? "people" : "person"} on 
           ${deleteRes.dayOfWeek}, ${selectedDate.format("MM/DD/YYYY")} at ${deleteRes.time.format("h:mm A")} under the name ${deleteRes.firstName} ${deleteRes.lastName}. 
           </h2>`
