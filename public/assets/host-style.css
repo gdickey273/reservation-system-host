@@ -77,6 +77,10 @@ body{
   background-color: #759aab;
 }
 
+.res-button:focus {
+  background-color: #0f5b7e;
+}
+
 .res-button-text{
   padding-bottom: 5px;
 }
@@ -84,8 +88,10 @@ body{
 .available-button{
   background-color: #a1c084;
   font-size: 0;
-  
- 
+}
+
+.available-button:focus{
+  background-color: #6f8659;
 }
 
 .unavailable-button{
