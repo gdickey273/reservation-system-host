@@ -226,24 +226,33 @@ function listen() {
     ${deleteRes.firstName} ${deleteRes.lastName} party of ${deleteRes.partyNumber}`)
   })
 
-  $("#confirm-delete").click(function(event){
+  $("#confirm-delete").click(function (event) {
     deleteRes.time = parseInt(deleteRes.time.format("HHmm"));
     let insideOutside = deleteRes.tableNumber < 100 ? "insideTables" : "outsideTables";
     let path = `scheduleByDate/${selectedDate.format("MMDDYYYY")}/${insideOutside}/${deleteRes.tableNumber}`
     cloud.doc(path).update({
-      reservations: 
-      firebase.firestore.FieldValue.arrayRemove(deleteRes)
-    }).then(()=> {
-      
-    deleteRes.type = "delete";
-    deleteRes.date = selectedDate.format("MM/DD/YYYY");
-    localStorage.setItem("resData", JSON.stringify(deleteRes));
-    window.location.href = "confirmation.html";
+      reservations:
+        firebase.firestore.FieldValue.arrayRemove(deleteRes)
+    }).then(() => {
+      cloud.collection('mail').add({
+        to: "eddyreservationlog@gmail.com",
+        message: {
+          subject: `DELETED RESERVATION ${lastName} ${reservationData.date}`,
+          html: `<h2> RESERVATION DELETED! ${partyNumber} ${partyNumber > 1 ? "people" : "person"} on 
+          ${dayOfWeek}, ${reservationData.date} at ${desiredTime.format("h:mm A")} under the name ${firstName} ${lastName}. 
+          </h2>`
+        }
+      }).then(() => {
+
+        deleteRes.type = "delete";
+        deleteRes.date = selectedDate.format("MM/DD/YYYY");
+        localStorage.setItem("resData", JSON.stringify(deleteRes));
+        window.location.href = "confirmation.html";
+      })
     })
-  })
+  });
 
-
-  function buildReservation (jQueryEl) {
+  function buildReservation(jQueryEl) {
     if (isReschedule) {
       rescheduleRes[0].time = rescheduleRes[0].time.format("HHmm");
       rescheduleRes[0].desiredTime = jQueryEl.parent().parent().parent().parent().attr("class").split("-")[1].split(" ")[0];
@@ -266,7 +275,7 @@ function listen() {
     if ($(this).parent().siblings(".unavailable-button").length) {
       console.log("get that modal bby");
       $("#confirm-schedule").modal("show");
-      $("#confirm-button").click(function (){
+      $("#confirm-button").click(function () {
         console.log("lcick");
         buildReservation(el);
       })
@@ -279,7 +288,7 @@ function listen() {
     location.reload();
   })
 
-  $(".details-button").click(function(event){
+  $(".details-button").click(function (event) {
     let res = $(this).parent().siblings().data("res");
     $("#res-details-text").html(`<ul> <li>Table: ${res.tableNumber} </li>
     <li>Time: ${res.time.format("h:mm A")} </li>
@@ -305,7 +314,7 @@ function listen() {
     }
 
 
-    if($(window).width() - $(this).offset().left - $(this).width() < 100){
+    if ($(window).width() - $(this).offset().left - $(this).width() < 100) {
       console.log('nope!');
       $('.dropdown-button').css('left', "").css('right', $(this).width());
     } else {
@@ -314,7 +323,7 @@ function listen() {
 
     currentDropdown = $(this).find(".dropdown-content");
     currentDropdown.css("display", "block");
-    
+
     //If its an available or res button, add dropdown
     if ($(this).hasClass("available-button")) {
       console.log($(this));
@@ -422,7 +431,7 @@ $(window).click(function (event) {
 //   $("#delete-pop-up").css("display", "none");
 // })
 
-$(".escape").click(function(event){
+$(".escape").click(function (event) {
   $(".pop-up").css("display", "none");
 })
 
