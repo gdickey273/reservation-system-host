@@ -254,7 +254,9 @@ async function makeReservation() {
     await batch.commit()
     .then(() => {
       console.log("success!");
-      sendConfirmationEmail();
+      if(emailAddress){
+        sendConfirmationEmail();
+      }
       })
     .catch(err => console.log("Failed!", err));
 
