@@ -286,7 +286,7 @@ async function makeReservation() {
         <div style="color:#000;">
         <h2 style="color:#000;">Thank you for booking a reservation with us at the Eddy Pub!</h2>
         <p style="color:#000;">We've got you down for ${partyNumber} ${partyNumber > 1 ? "people" : "person"} on 
-        ${dayOfWeek}, ${reservationData.date} at ${time.format("h:mm A")} under the name ${firstName} ${lastName}.<br> 
+        ${dayOfWeek}, ${reservationData.date} at ${reservationData.time.format("h:mm A")} under the name ${firstName} ${lastName}.<br> 
         I acknowledge that by making this reservation:
         <ul>
             <li> I have no symptoms related to Covid-19 and will not dine at The Eddy should I develop symptoms</li>
