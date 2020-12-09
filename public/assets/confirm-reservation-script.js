@@ -7,8 +7,8 @@ const date = reservationData.date;
 var formattedDate = date.replace("/", "").replace("/", "");
 const originalTableNumber = reservationData.originalTableNumber;
 const desiredTableNumber = reservationData.desiredTableNumber;
-const originalInsideOutside = originalTableNumber < 100 ? "insideTables" : "outsideTables";
-const desiredInsideOutside = desiredTableNumber < 100 ? "insideTables" : "outsideTables";
+const  originalInsideOutside = originalTableNumber < 100 ? "insideTables" : "outsideTables";
+const  desiredInsideOutside = desiredTableNumber < 100 ? "insideTables" : "outsideTables";
 let dayOfWeek = reservationData.dayOfWeek;
 let firstName;
 let lastName;
@@ -47,7 +47,7 @@ function initializeWithRescheduleInfo() {
       notes
     }
     originalResPath = `scheduleByDate/${formattedDate}/${originalInsideOutside}/${reservationData.originalTableNumber}`;
-
+  
     // cloud.doc(originalResPath).update({
     //   reservations:
     //   firebase.firestore.FieldValue.arrayRemove(originalResObj)}).then(()=>{
@@ -115,7 +115,7 @@ function updatePage() {
       batch.set(ref102, { reservations: [] });
 
       var ref103 = cloud.collection("scheduleByDate").doc(formattedDate).collection("outsideTables").doc("103");
-      batch.set(ref103, { reservations: [] });
+      batch.set(ref103, {reservations : []});
 
       var ref105 = cloud.collection("scheduleByDate").doc(formattedDate).collection("outsideTables").doc("105");
       batch.set(ref105, { reservations: [] });
@@ -157,13 +157,13 @@ function checkInputValidity() {
   //   }
   // });
 
-
+  
   if ($("#party-number").val() === "") {
     $("#party-number-error-message").html("Field cannot be left blank!");
     isValid = false;
   }
 
-  if ($("#first-name").val() === "" && $("#last-name").val() === "") {
+  if($("#first-name").val() === "" && $("#last-name").val() === ""){
     if ($("#last-name").val() === "") {
       $("#last-name-error-message").html("Field cannot be left blank!");
       isValid = false;
@@ -174,7 +174,7 @@ function checkInputValidity() {
     }
 
   }
-
+  
 
   // for (let char of firstNameInputVal){
   //   if (validNameChars.indexOf(char) === -1){
@@ -242,23 +242,23 @@ async function makeReservation() {
     notes
   };
 
-
-
+  
+  
   if (isReschedule) {
     //reservationData.time = parseInt(desiredTime.format("HHmm"))
     let batch = cloud.batch();
 
-    batch.update(cloud.doc(originalResPath), { reservations: firebase.firestore.FieldValue.arrayRemove(originalResObj) });
-    batch.update(cloud.doc(path), { reservations: firebase.firestore.FieldValue.arrayUnion(reservationData) });
+    batch.update(cloud.doc(originalResPath), {reservations : firebase.firestore.FieldValue.arrayRemove(originalResObj)});
+    batch.update(cloud.doc(path), {reservations : firebase.firestore.FieldValue.arrayUnion(reservationData)});
 
     await batch.commit()
-      .then(() => {
-        console.log("success!");
-        if (emailAddress) {
-          sendConfirmationEmail();
-        }
+    .then(() => {
+      console.log("success!");
+      
+        sendConfirmationEmail();
+      
       })
-      .catch(err => console.log("Failed!", err));
+    .catch(err => console.log("Failed!", err));
 
   } else {
     cloud.doc(path).update({
@@ -267,26 +267,26 @@ async function makeReservation() {
     }).then(() => sendConfirmationEmail());
   }
 
-  function sendConfirmationEmail() {
+  function sendConfirmationEmail(){
     reservationData.dayOfWeek = dayOfWeek;
     reservationData.date = date;
     reservationData.type = isReschedule ? "Reschedule" : "Schedule";
     localStorage.setItem("resData", JSON.stringify(reservationData));
-
+  
     cloud.collection('mail').add({
-      to: emailAddress,
-      bcc: "eddyreservationlog@gmail.com",
+      to: emailAddress ? emailAddress : "eddyreservationlog@gmail.com",
+      bcc: emailAddress ? "eddyreservationlog@gmail.com" : "",
       message: {
         subject: `The Eddy Pub Reservation Confirmation`,
         html:
-          `<div>
+        `<div>
         <img style="height:150px; width:auto;" src="https://images.squarespace-cdn.com/content/5956a474ccf2106856898d23/1498851213545-UXMZE3RQ4WH4H75K7ED4/Eddy+logo+transparent.png?content-type=image%2Fpng">
         </div>
         
         <div style="color:#000;">
         <h2 style="color:#000;">Thank you for booking a reservation with us at the Eddy Pub!</h2>
         <p style="color:#000;">We've got you down for ${partyNumber} ${partyNumber > 1 ? "people" : "person"} on 
-        ${dayOfWeek}, ${reservationData.date} at ${time.format("h:mm A")} under the name ${firstName} ${lastName}.<br> 
+        ${dayOfWeek}, ${reservationData.date} at ${desiredTime.format("h:mm A")} under the name ${firstName} ${lastName}.<br> 
         I acknowledge that by making this reservation:
         <ul>
         <li> I understand my reservation is for an hour and 15 min, and a mask must be worn. </li>
@@ -296,29 +296,22 @@ async function makeReservation() {
             <li> The Eddy reserves the right to check my temperature upon entering the establishment should I present with symptoms</li>
             <li> I am knowingly choosing to dine in a restaurant during a Pandemic and where risk of contracting Covid-19 may be present. I hold The Eddy, its staff, owners, and customers harmless in any claims where possibility of contraction is concerned.</li>
         </ul>
-Don't be THAT GUY/GAL and not show up for your reservation. That's just mean - to us, our staff, and other customers. We need everyone's cooperation to make this work. Please let us know if you are unable to make your reservation as soon as possible.
+        Don't be THAT GUY/GAL and not show up for your reservation. That's just mean - to us, our staff, and other customers. We need everyone's cooperation to make this work. Please let us know if you are unable to make your reservation as soon as possible.
 
-For OUTSIDE Tables: 
+        For OUTSIDE Tables: 
 
-I understand that I am booking a table outside where the weather is unpredictable and which may cause my reservation to change at no fault of anyone. The Eddy cannot guarantee table availability inside in the case of bad weather, and I may choose to cancel or change my reservation ahead of time to avoid any hardship.<br>
-( ${isReschedule ? `RESCHEDULED from ${originalResObj.time.format("h:mm A")}` : ""} )        
-</p>
+        I understand that I am booking a table outside where the weather is unpredictable and which may cause my reservation to change at no fault of anyone. The Eddy cannot guarantee table availability inside in the case of bad weather, and I may choose to cancel or change my reservation ahead of time to avoid any hardship.<br>
+       ${isReschedule ? `(RESCHEDULED from ${originalResObj.time.format("h:mm A")})` : ""}         
+        </p>
         </div>`
-
-
+        
+       
 
       }
     }).then(() => {
       window.location.href = "confirmation.html";
     });
   }
-
-
-
-
-
-
-
 }
 
 
