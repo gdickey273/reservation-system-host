@@ -214,7 +214,7 @@ $("#date").change(function () {
   dateCopy = moment($(this).val().replace(/\//g, ""), "L");
   dayOfWeek = selectedDate.day();
   updateOperatingHours();
-  initializeResCount();
+  
   initializeTables();
 
   let now = moment();
@@ -280,6 +280,7 @@ $("#submit-button").click(function (event) {
 
 //For each table object in inside/outside table array, pull reservation data from cloud and push to table object's reservation array
 async function initializeTables() {
+  initializeResCount();
   var docPath = "scheduleByDate/" + selectedDate._i + "/";
   
   for (let table of insideTables) {

@@ -296,7 +296,7 @@ async function makeReservation() {
             <li> The Eddy reserves the right to check my temperature upon entering the establishment should I present with symptoms</li>
             <li> I am knowingly choosing to dine in a restaurant during a Pandemic and where risk of contracting Covid-19 may be present. I hold The Eddy, its staff, owners, and customers harmless in any claims where possibility of contraction is concerned.</li>
         </ul>
-        Don't be THAT GUY/GAL and not show up for your reservation. That's just mean - to us, our staff, and other customers. We need everyone's cooperation to make this work. Please let us know if you are unable to make your reservation as soon as possible.
+        Don't be THAT PERSON and not show up for your reservation. That's just mean - to us, our staff, and other customers. We need everyone's cooperation to make this work. Please let us know if you are unable to make your reservation as soon as possible.
 
         For OUTSIDE Tables: 
 
